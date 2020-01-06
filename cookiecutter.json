@@ -1,0 +1,17 @@
+{
+    "release_name": "fmdb",
+    "release_version": "1.0.0",
+    "release_namespace": "default",
+    "docker_image": "arjun921/fmdb:latest",
+    "container_port": 5000,
+    "expose_endpoint": "example.com",
+    "expose_path": "/",
+    "expose_port": 80,
+    "min_replicas": 1,
+    "max_replicas": 5,
+    "max_cpu_percentage": 70,
+    "max_cpu": "1024m",
+    "max_memory": "512Mi",
+    "min_cpu": "100m",
+    "min_memory": "128Mi"
+}

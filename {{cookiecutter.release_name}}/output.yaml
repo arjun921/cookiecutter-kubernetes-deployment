@@ -1,0 +1,111 @@
+---
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{cookiecutter.release_name}}-service
+  namespace: {{cookiecutter.release_namespace}}
+  labels:
+    app.kubernetes.io/name: {{cookiecutter.release_name}}
+    app.kubernetes.io/version: {{cookiecutter.release_version}}
+    app.kubernetes.io/instance: {{cookiecutter.release_name}}
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: {{cookiecutter.expose_port}}
+    targetPort: {{cookiecutter.container_port}}
+  selector:
+    app.kubernetes.io/name: {{cookiecutter.release_name}}
+    app.kubernetes.io/version: {{cookiecutter.release_version}}
+    app.kubernetes.io/instance: {{cookiecutter.release_name}}
+---
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{cookiecutter.release_name}}-deployment
+  namespace: {{cookiecutter.release_namespace}}
+  labels:
+    app.kubernetes.io/name: {{cookiecutter.release_name}}
+    app.kubernetes.io/version: {{cookiecutter.release_version}}
+    app.kubernetes.io/instance: {{cookiecutter.release_name}}
+spec:
+  replicas: {{cookiecutter.min_replicas}}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{cookiecutter.release_name}}
+      app.kubernetes.io/version: {{cookiecutter.release_version}}
+      app.kubernetes.io/instance: {{cookiecutter.release_name}}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{cookiecutter.release_name}}
+        app.kubernetes.io/version: {{cookiecutter.release_version}}
+        app.kubernetes.io/instance: {{cookiecutter.release_name}}
+    spec:
+      containers:
+        - name: {{cookiecutter.release_name}}
+          image: "{{cookiecutter.docker_image}}"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: {{cookiecutter.container_port}}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{cookiecutter.expose_path}}
+              port: {{cookiecutter.container_port}}
+          readinessProbe:
+            httpGet:
+              path: {{cookiecutter.expose_path}}
+              port: {{cookiecutter.container_port}}
+          resources:
+            limits:
+              cpu: {{cookiecutter.max_cpu}}
+              memory: {{cookiecutter.max_memory}}
+            requests:
+              cpu: {{cookiecutter.min_cpu}}
+              memory: {{cookiecutter.min_memory}}
+---
+# hpa.yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{cookiecutter.release_name}}-hpa
+  namespace: {{cookiecutter.release_namespace}}
+spec:
+  maxReplicas: {{cookiecutter.max_replicas}}
+  minReplicas: {{cookiecutter.min_replicas}}
+  targetCPUUtilizationPercentage: {{cookiecutter.max_cpu_percentage}}
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: {{cookiecutter.release_name}}-deployment
+---
+# ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{cookiecutter.release_name}}-ingress
+  namespace: {{cookiecutter.release_namespace}}
+  labels:
+    app.kubernetes.io/name: {{cookiecutter.release_name}}
+    app.kubernetes.io/version: {{cookiecutter.release_version}}
+    app.kubernetes.io/instance: {{cookiecutter.release_name}}
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-pre-production
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: {{cookiecutter.expose_endpoint}}
+      http:
+        paths:
+          - path: {{cookiecutter.expose_path}}
+            backend:
+              serviceName: {{cookiecutter.release_name}}-service
+              servicePort: {{cookiecutter.expose_port}}
+  tls:
+    - hosts:
+        - {{cookiecutter.expose_endpoint}}
+      secretName: {{cookiecutter.release_name}}-tls
