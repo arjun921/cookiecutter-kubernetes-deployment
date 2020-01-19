@@ -1,6 +1,16 @@
 # cookiecutter-kubernetes-deployment
 
-A cookiecutter template for creating kubernetes deployment with CPU based autoscaling. 
+Trying to make a Kubernetes deployment but can't seem to make sense on how to create the YAML?
+
+Got the service running but can't seem to scale up on load?
+
+Cookie cutter is here for the rescue. 
+
+Just install the cookiecutter package and generate a YAML ready for  `kubectl apply`.
+
+> All you need is a running Kubernetes cluster with metrics-server for this to work! 
+
+This repository is a cookiecutter template for creating Kubernetes deployment with CPU based Autoscaling. 
 Default values deploy a simple flask based IMDB clone. 
 
 ## How to Run
@@ -27,7 +37,7 @@ $ kubectl cluster-info # ensure you are connected to your kubernetes cluster
 $ kubectl apply -f my-release-name/
 ```
 
-The above mentioned steps can deploy any containerized flask app with Autoscaling enabled.
+The above mentioned steps can deploy any containerized app with AutoScaling enabled.
 
 ### Parameters
 
